@@ -2,12 +2,13 @@
 #-------------Запуск Бота----------------
 
 
-import token_bot
+#import token_bot
 
 import dei_json
 import gspread #таблица гугл
 # from google.oauth2.service_account import Credentials
 
+import os
 import asyncio
 from maxbot.bot import Bot
 from maxbot.dispatcher import Dispatcher
@@ -18,13 +19,13 @@ from maxbot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton #, 
 
 nachalo = 0
 
-BOT_TOKEN = token_bot.TOKEN #записываем токен
+BOT_TOKEN = os.getenv(TOKEN)#token_bot.TOKEN #записываем токен
 
 bot = Bot(token=BOT_TOKEN)   #создаём тело бота
 dp = Dispatcher(bot)  #обработчик команд
 
-gc = gspread.service_account(filename='sntkrutyegorki-086134b54bc6.json')
-sh = gc.open_by_key('1xVcZRuSL7SRUVIxupbzRk7D7uLKR898ZLy75bvVgyow')
+gc = gspread.service_account(filename=os.getenv(sntkrutyegorki-086134b54bc6))
+sh = gc.open_by_key(os.getenv(key))
 
 worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
 worksheet2 = sh.get_worksheet(5)
