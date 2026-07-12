@@ -7,7 +7,7 @@ import os
 
 def json_to_clientc(id, nomer):     #добавление/изменение в json файл айди пользователя к которому привязан участок
     # Путь к вашему JSON-файлу
-    file_path = os.getenv(clients)
+    file_path = os.getenv('clients')
 
     # Значение, которое вы хотите присвоить id (может быть строкой или числом)
 
@@ -29,7 +29,7 @@ def json_to_clientc(id, nomer):     #добавление/изменение в 
     # print(f"Поле id успешно установлено в {nomer} в разделе client.")
 
 def json_in_client(id):       #узнаём какой участок привязан к определённому айди
-    file_path = os.getenv(clients)
+    file_path = os.getenv('clients')
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -40,7 +40,7 @@ def json_in_client(id):       #узнаём какой участок привя
     return nomer
 
 def json_to_col_vo(idt):       #записываем первый ли раз нам написал пользователь
-    file_path = os.getenv(clients)
+    file_path = os.getenv('clients')
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
