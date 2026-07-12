@@ -25,7 +25,14 @@ BOT_TOKEN = os.getenv('TOKEN')#token_bot.TOKEN #записываем токен
 bot = Bot(token=BOT_TOKEN)   #создаём тело бота
 dp = Dispatcher(bot)  #обработчик команд
 
-gc = gspread.service_account(filename=os.getenv('sntkrutyegorkikod'))
+#gc = gspread.service_account(filename=os.getenv('sntkrutyegorkikod'))
+creds_json = os.getenv('sntkrutyegorkikod')
+if creds_json:
+    creds_dict = json.loads(creds_json)
+    # Создаём учётные данные
+    creds = Credentials.from_service_account_info(creds_dict)
+    # Авторизуемся в Google Sheets
+    gc = gspread.authorize(creds)
 sh = gc.open_by_key(os.getenv('key'))
 
 worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
