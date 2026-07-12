@@ -24,7 +24,7 @@ BOT_TOKEN = os.getenv('TOKEN')#token_bot.TOKEN #записываем токен
 bot = Bot(token=BOT_TOKEN)   #создаём тело бота
 dp = Dispatcher(bot)  #обработчик команд
 
-gc = gspread.service_account(filename=os.getenv('sntkrutyegorki-086134b54bc6'))
+gc = gspread.service_account(filename=os.getenv('sntkrutyegorkikod'))
 sh = gc.open_by_key(os.getenv('key'))
 
 worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
