@@ -10,7 +10,8 @@ import gspread #таблица гугл
 
 import os
 import asyncio
-from maxbot.bot import Bot
+#from maxbot.bot import Bot
+from maxbot import Bot
 from maxbot.dispatcher import Dispatcher
 from maxbot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton #, Callback
 
