@@ -45,7 +45,7 @@ def json_to_col_vo(idt):       #записываем первый ли раз н
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     else:
-        data = {}
+        data = os.getenv('clients')
     # print(data["col_vo"])
     # print(idt)
     value = data["col_vo"].get(str(idt))
