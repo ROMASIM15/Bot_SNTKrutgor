@@ -15,8 +15,8 @@ from maxbot.bot import Bot
 #from maxbot import Bot
 from maxbot.dispatcher import Dispatcher
 from maxbot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton #, Callback
-import logging
-logging.basicConfig(level=logging.INFO)
+# import logging
+# logging.basicConfig(level=logging.INFO)
 
 
 
