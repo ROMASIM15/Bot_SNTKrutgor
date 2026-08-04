@@ -179,7 +179,7 @@ async def handle_messages(message: Message):
     logging.info(f"Получено сообщение от {message.user_id}: {message.text}") 
 
     
-    user_id = message.user_id()  # правильный ID отправителя
+    user_id = message.user_id #()  # правильный ID отправителя
 
     # Увеличиваем счётчик для этого пользователя
 
