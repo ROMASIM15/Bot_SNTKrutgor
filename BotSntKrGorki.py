@@ -183,8 +183,8 @@ async def handle_messages(message: Message):
         logging.info(f"Получено сообщение от {user_id}: {message.text}")
 
         # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
-        # count = dei_json.json_to_col_vo(user_id)
-        count = 1  # для теста
+        count = dei_json.json_to_col_vo(user_id)
+        # count = 1  # для теста
 
         if count == 1:
             await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
