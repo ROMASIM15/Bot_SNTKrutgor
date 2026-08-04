@@ -174,36 +174,75 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 
 
 
+
+
 @dp.message()           #обработчик сообщений
 async def handle_messages(message: Message):
-    logging.info(f"Получено сообщение от {message.user_id()}: {message.text}") 
+     try:
+        user_id = message.user_id()
+        logging.info(f"Получено сообщение от {user_id}: {message.text}")
+
+        # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
+        # count = dei_json.json_to_col_vo(user_id)
+        count = 1  # для теста
+
+        if count == 1:
+            await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
+            await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+        else:
+            text = message.text
+            if text != "админ":
+                ob_text = extract_digits(text)
+                if ob_text != "":
+                    nomera = worksheet[0].col_values(1)
+                    if str(ob_text) in nomera:
+                        dei_json.json_to_clientc(user_id, ob_text)
+                        await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
+                    else:
+                        await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+                else:
+                    await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
+            else:
+                await bot.send_message(user_id=user_id, text='Здраствуйте админ')
+    except Exception as e:
+        logging.error(f"Ошибка в обработчике: {e}", exc_info=True)
+        try:
+            await bot.send_message(user_id=user_id, text="Произошла ошибка, попробуйте позже.")
+        except:
+            pass
+
+
+
 
     
-    user_id = message.user_id()  # правильный ID отправителя
+    # logging.info(f"Получено сообщение от {message.user_id()}: {message.text}") 
 
-    # Увеличиваем счётчик для этого пользователя
+    
+    # user_id = message.user_id()  # правильный ID отправителя
 
-    count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
+    # # Увеличиваем счётчик для этого пользователя
 
-    if count == 1:
-        await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
-        await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+    # count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
 
-    else:
-        text = message.text
-        if text != "админ":
-            ob_text = extract_digits(text)
-            if ob_text != "":
-                nomera = worksheet[0].col_values(1)
-                if str(ob_text) in nomera:
-                    dei_json.json_to_clientc(user_id, ob_text)
-                    await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
-                else:
-                    await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
-            else:
-                await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
-        else:
-            await bot.send_message(user_id=user_id, text='Здраствуйте админ')
+    # if count == 1:
+    #     await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
+    #     await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+
+    # else:
+    #     text = message.text
+    #     if text != "админ":
+    #         ob_text = extract_digits(text)
+    #         if ob_text != "":
+    #             nomera = worksheet[0].col_values(1)
+    #             if str(ob_text) in nomera:
+    #                 dei_json.json_to_clientc(user_id, ob_text)
+    #                 await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
+    #             else:
+    #                 await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+    #         else:
+    #             await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
+    #     else:
+    #         await bot.send_message(user_id=user_id, text='Здраствуйте админ')
 
 @dp.callback()
 async def on_callback(cb):
