@@ -48,7 +48,7 @@ def json_to_col_vo(idt):       #записываем первый ли раз н
         data = {}
     # print(data["col_vo"])
     # print(idt)
-    value = data['col_vo'].get(str(idt))
+    value = data["col_vo"].get(str(idt))
     # print(value)
     if value == None:
         data["col_vo"][idt] = 1
