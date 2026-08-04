@@ -8,6 +8,7 @@ import dei_json
 import gspread #таблица гугл
 # from google.oauth2.service_account import Credentials
 
+import json
 import os
 import asyncio
 from maxbot.bot import Bot
@@ -25,16 +26,36 @@ BOT_TOKEN = os.getenv('TOKEN')#token_bot.TOKEN #записываем токен
 bot = Bot(token=BOT_TOKEN)   #создаём тело бота
 dp = Dispatcher(bot)  #обработчик команд
 
-sntkrutyegorkikodpromo = os.getenv('sntkrutyegorkikod'
-gc = gspread.service_account(filename="sntkrutyegorkikodpromo"))
-# creds_json = os.getenv('sntkrutyegorkikod')
-# if creds_json:
-#     creds_dict = json.loads(creds_json)
-#     # Создаём учётные данные
-#     creds = Credentials.from_service_account_info(creds_dict)
-#     # Авторизуемся в Google Sheets
-#     gc = gspread.authorize(creds)
-sh = gc.open_by_key(key=os.getenv('key'))
+
+# ----- АВТОРИЗАЦИЯ GOOGLE SHEETS -----
+creds_json = os.getenv('sntkrutyegorkikod')
+if creds_json:
+    try:
+        creds_dict = json.loads(creds_json)
+        from google.oauth2.service_account import Credentials
+        creds = Credentials.from_service_account_info(creds_dict)
+        gc = gspread.authorize(creds)
+    except Exception as e:
+        print(f"Ошибка авторизации Google: {e}")
+        raise
+else:
+    # fallback – если переменной нет (для локального теста)
+    gc = gspread.service_account(filename='sntkrutyegorki-086134b54bc6.json')
+
+# Теперь открываем таблицу по ключу
+sh = gc.open_by_key(os.getenv('key'))
+
+
+# sntkrutyegorkikodpromo = os.getenv('sntkrutyegorkikod'
+# gc = gspread.service_account(filename="sntkrutyegorkikodpromo"))
+# # creds_json = os.getenv('sntkrutyegorkikod')
+# # if creds_json:
+# #     creds_dict = json.loads(creds_json)
+# #     # Создаём учётные данные
+# #     creds = Credentials.from_service_account_info(creds_dict)
+# #     # Авторизуемся в Google Sheets
+# #     gc = gspread.authorize(creds)
+# sh = gc.open_by_key(key=os.getenv('key'))
 
 worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
 worksheet2 = sh.get_worksheet(5)
