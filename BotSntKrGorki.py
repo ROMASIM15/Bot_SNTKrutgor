@@ -35,8 +35,8 @@ if creds_json:
     from google.oauth2.service_account import Credentials
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-        # creds = Credentials.from_service_account_info(creds_dict)
-        gc = gspread.authorize(creds)
+    # creds = Credentials.from_service_account_info(creds_dict)
+    gc = gspread.authorize(creds)
     # except Exception as e:
     #     print(f"Ошибка авторизации Google: {e}")
     #     raise
