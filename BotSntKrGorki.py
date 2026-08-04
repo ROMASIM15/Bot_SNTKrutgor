@@ -174,6 +174,8 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 
 
 @dp.message()           #обработчик сообщений
+print(f"Получено сообщение от {message.user_id}: {message.text}") 
+
 async def handle_messages(message: Message):
     user_id = message.user_id()  # правильный ID отправителя
 
