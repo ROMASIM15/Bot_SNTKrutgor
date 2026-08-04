@@ -25,7 +25,7 @@ BOT_TOKEN = os.getenv('TOKEN')#token_bot.TOKEN #записываем токен
 bot = Bot(token=BOT_TOKEN)   #создаём тело бота
 dp = Dispatcher(bot)  #обработчик команд
 
-gc = gspread.service_account(filename='os.getenv('sntkrutyegorkikod')')
+gc = gspread.service_account(filename=os.getenv('sntkrutyegorkikod'))
 # creds_json = os.getenv('sntkrutyegorkikod')
 # if creds_json:
 #     creds_dict = json.loads(creds_json)
