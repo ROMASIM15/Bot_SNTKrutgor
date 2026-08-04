@@ -15,7 +15,8 @@ from maxbot.bot import Bot
 #from maxbot import Bot
 from maxbot.dispatcher import Dispatcher
 from maxbot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton #, Callback
-
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 
@@ -175,7 +176,7 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 
 @dp.message()           #обработчик сообщений
 async def handle_messages(message: Message):
-    print(f"Получено сообщение от {message.user_id}: {message.text}") 
+    logging.info(f"Получено сообщение от {message.user_id}: {message.text}") 
 
     
     user_id = message.user_id()  # правильный ID отправителя
