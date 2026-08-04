@@ -178,7 +178,7 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 
 @dp.message()           #обработчик сообщений
 async def handle_messages(message: Message):
-     try:
+    try:
         user_id = message.user_id()
         logging.info(f"Получено сообщение от {user_id}: {message.text}")
 
