@@ -30,16 +30,16 @@ dp = Dispatcher(bot)  #обработчик команд
 # ----- АВТОРИЗАЦИЯ GOOGLE SHEETS -----
 creds_json = os.getenv('sntkrutyegorkikod')
 if creds_json:
-    try:
+    # try:
         creds_dict = json.loads(creds_json)
         from google.oauth2.service_account import Credentials
         scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
         # creds = Credentials.from_service_account_info(creds_dict)
         gc = gspread.authorize(creds)
-    except Exception as e:
-        print(f"Ошибка авторизации Google: {e}")
-        raise
+    # except Exception as e:
+    #     print(f"Ошибка авторизации Google: {e}")
+    #     raise
 else:
     # fallback – если переменной нет (для локального теста)
     gc = gspread.service_account(filename='sntkrutyegorki-086134b54bc6.json')
