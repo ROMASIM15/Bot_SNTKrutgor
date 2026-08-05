@@ -314,7 +314,7 @@ async def on_callback(cb):
                 if int(rows[19]) > 0:
                     await bot.send_message(user_id=cb.user.id, text=f'Ваш общий долг равен {rows[19]}')
                 else:
-                    await bot.send_message(user_id=cb.user.id, text=f'Ваша общиая переплата равна {rows[19]}')
+                    await bot.send_message(user_id=cb.user.id, text=f'Ваша общиая переплата равна {abs(int(rows[19]))}')
             else:
                 await bot.send_message(user_id=cb.user.id, text="У вас нет долгов")
         else:
