@@ -326,8 +326,10 @@ async def on_callback(cb):
                 await bot.send_message(user_id=cb.user.id, text="У вас нет долгов")
         else:
             await bot.send_message(user_id=cb.user.id, text=f'участок {nomer} в 2026году не найден')
-        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
         await bot.send_message(user_id=cb.user.id, text=f'данная информация обновлена:\n {clean}')
+        
+        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
+        
     
     elif cb.payload == "recvisit": #реквизиты для оплаты
         await bot.send_file(user_id=cb.user.id, file_path="россельхозбанк qr од.png", media_type="image", text="Оплата за землю (СБЕР БАНК):")
