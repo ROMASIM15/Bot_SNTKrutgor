@@ -3,7 +3,8 @@
 
 import json
 import os
-
+import logging
+logging.basicConfig(level=logging.INFO)
 
 def json_to_clientc(id, nomer):     #добавление/изменение в json файл айди пользователя к которому привязан участок
     # Путь к вашему JSON-файлу
@@ -46,7 +47,7 @@ def json_to_col_vo(idt):       #записываем первый ли раз н
             data = json.load(f)
     else:
         data = os.getenv('clients')
-    print data
+    logging.INFO(data)
     # print(data["col_vo"])
     # print(idt)
     value = data["col_vo"].get(str(idt))
