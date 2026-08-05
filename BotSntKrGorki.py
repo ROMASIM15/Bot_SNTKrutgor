@@ -261,7 +261,7 @@ async def handle_messages(message: Message):
                         need.update_cell(r, 2, text)
                         await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
                     else:
-                        await bot.send_message(user_id=user_id, text='Пароль не подходит, повторите попытку.',reply_markup=dobv_parol)
+                        await bot.send_message(user_id=user_id, text='Пароль не подходит, он должен состоять только из цифр минимум из двух, повторите попытку.',reply_markup=dobv_parol)
     
     
             else:
