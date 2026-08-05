@@ -180,7 +180,7 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 async def handle_messages(message: Message):
     try:
         user_id = message.user_id()
-        logging.info(f"Получено сообщение от {user_id}: {message.text}")
+        print(f"Получено сообщение от {user_id}: {message.text}")
 
         # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
         count = dei_json.json_to_col_vo(user_id)
