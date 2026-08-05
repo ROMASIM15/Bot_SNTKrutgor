@@ -63,6 +63,13 @@ sh = gc.open_by_key(os.getenv('key'))
 worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
 worksheet2 = sh.get_worksheet(5)
 
+if sh.lastUpdateTime:
+    time_table=str(sh.lastUpdateTime)
+    # print(time_table)
+    clean = time_table.replace("T", " ").replace("Z", "")
+    # time_table
+else:
+    time_table="не удалось загрузить дату обновления"
 #------------------------------функции -----------------------------------------------------------
 
 def extract_digits(text: str) -> str:
@@ -320,8 +327,38 @@ async def on_callback(cb):
         else:
             await bot.send_message(user_id=cb.user.id, text=f'участок {nomer} в 2026году не найден')
         await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
+        await bot.send_message(user_id=cb.user.id, text=f'данная информация обновлена:\n {clean}')
+    
     elif cb.payload == "recvisit": #реквизиты для оплаты
-        await bot.send_message(user_id=cb.user.id, text="Функция заблокирована!")
+        await bot.send_file(user_id=cb.user.id, file_path="россельхозбанк qr од.png", media_type="image", text="Оплата за землю (СБЕР БАНК):")
+        await bot.send_message(user_id=cb.user.id,
+                               text='''
+        Наименование: СНТ "КРУТЫЕ ГОРКИ"
+        ИНН: 2424003947
+        КПП: 242401001
+        ОГРН: 1052404017489
+        Расчетный счет: 40703810231000002895
+        Банк: КРАСНОЯРСКОЕ ОТДЕЛЕНИЕ №8646 ПАО СБЕРБАНК
+        БИК банка: 040407627
+        Корр. счёт банка: 30101810800000000627
+        ИНН банка: 7707083893
+        КПП БАНКА: 246602001''')
+        await bot.send_message(user_id=cb.user.id, text=f'(Пожалуйста, не забывайте указывать фамилию, сколько соток и номер участка)')
+        await bot.send_file(user_id=cb.user.id, file_path="россельхозбанк qr од.png", media_type="image",  text=f'Оплата за свет (РОССЕЛЬХОЗ):')
+        await bot.send_message(user_id=cb.user.id, text='''
+        Наименование: СНТ "КРУТЫЕ ГОРКИ"
+        Расчетный счет: 40703810349620000021
+        Договор: №184962/1515
+        Операционный офис Красноярского РФ АО "Россельхозбанк" №3349/49-2
+        БИК: 040407923
+        ИНН: 2424003947
+        КПП: 246643001
+        ОГРН: 1027700342890
+        К/С: 30101810300000000923''')
+        await bot.send_message(user_id=cb.user.id, text=f'(Пожалуйста, не забывайте указывать фамилию, сколько соток и номер участка)')
+
+        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
+        # await bot.send_message(user_id=cb.user.id, text="Функция заблокирована!")
 
 
 
