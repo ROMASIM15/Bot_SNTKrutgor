@@ -72,6 +72,9 @@ else:
     time_table="не удалось загрузить дату обновления"
 #------------------------------функции -----------------------------------------------------------
 
+def is_valid_digit_string(s: str) -> bool:
+    return s.isdigit() and len(s) >= 2
+
 def extract_digits(text: str) -> str:
     """Возвращает строку, содержащую только цифры из исходного текста."""
     return ''.join(ch for ch in text if ch.isdigit())
@@ -169,7 +172,19 @@ def info_dolg (table, god: int, number: float): #вывод подробной �
 keyboard = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура обычного пользователя
         [InlineKeyboardButton(text="Информация об участке", callback_data="inf_ych")],
         [InlineKeyboardButton(text="Передать показания", callback_data="peredati_pocaz")],
-        [InlineKeyboardButton(text="Реквизиты для оплаты", callback_data="recvisit")]
+        [InlineKeyboardButton(text="Реквизиты для оплаты", callback_data="recvisit")],
+        [InlineKeyboardButton(text="сменить пароль", callback_data="parol")]
+
+    ])
+
+vbod_parol = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура обычного пользователя
+        [InlineKeyboardButton(text="Выбрать другой участок", callback_data="ne_tot")]
+
+    ])
+
+dobv_parol = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура обычного пользователя
+        [InlineKeyboardButton(text="Оставить старый пароль", callback_data="star")]
+
     ])
 
 keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатура админа
@@ -186,31 +201,102 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 @dp.message()           #обработчик сообщений
 async def handle_messages(message: Message):
     try:
-        user_id = message.user_id()
-        print(f"Получено сообщение от {user_id}: {message.text}")
+        user_id = message.user_id()  # правильный ID отправителя
 
-        # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
-        count = dei_json.json_to_col_vo(user_id)
-        # count = 1  # для теста
+    # Увеличиваем счётчик для этого пользователя
 
+        count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
+    
         if count == 1:
             await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
             await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+    
         else:
             text = message.text
             if text != "админ":
-                ob_text = extract_digits(text)
-                if ob_text != "":
-                    nomera = worksheet[0].col_values(1)
-                    if str(ob_text) in nomera:
-                        dei_json.json_to_clientc(user_id, ob_text)
+                new = dei_json.new_parol(user_id)
+                # print(new)
+                if new == None:
+    
+                    ob_text = extract_digits(text)
+                    parol = dei_json.sostoinie_parol(user_id)
+                    need = sh.get_worksheet(6)
+                    need2 = need.col_values(1)
+    
+    
+                    if parol == None:
+    
+                        if ob_text != "":
+                            nomera = worksheet[0].col_values(1)
+                            if str(ob_text) in nomera:
+                                await bot.send_message(user_id=user_id, text='Напишите пароль.')
+                                dei_json.sostoinie_parol_yes(user_id, ob_text)
+                            else:
+                                await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+                        else:
+                            await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
+                    else:
+                        r = need2.index(parol) + 1  # узнаем какой по счету в столбце участок
+                        rows = need.row_values(r)
+                        parol_text = rows[1]
+                        if str(parol_text) == str(ob_text):
+                            dei_json.json_to_clientc(user_id, parol)
+                            dei_json.sostoinie_parol_no(user_id)
+                            await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
+    
+                        else:
+                            await bot.send_message(user_id=user_id, text='Пароль не верный, повторите попытку.', reply_markup=vbod_parol)
+    
+    
+    
+    
+                else:
+                    if is_valid_digit_string(text)==True:
+                        dei_json.new_parol_no(user_id)
+                        need = sh.get_worksheet(6)
+                        need2 = need.col_values(1)
+                        r = need2.index(dei_json.json_in_client(user_id)) + 1  # узнаем какой по счету в столбце участок
+                         # rows = need.row_values(r)
+                        # print(r)
+                        need.update_cell(r, 2, text)
                         await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
                     else:
-                        await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
-                else:
-                    await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
+                        await bot.send_message(user_id=user_id, text='Пароль не подходит, повторите попытку.',reply_markup=dobv_parol)
+    
+    
             else:
                 await bot.send_message(user_id=user_id, text='Здраствуйте админ')
+
+
+
+
+
+        
+        # user_id = message.user_id()
+        # print(f"Получено сообщение от {user_id}: {message.text}")
+
+        # # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
+        # count = dei_json.json_to_col_vo(user_id)
+        # # count = 1  # для теста
+
+        # if count == 1:
+        #     await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
+        #     await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+        # else:
+        #     text = message.text
+        #     if text != "админ":
+        #         ob_text = extract_digits(text)
+        #         if ob_text != "":
+        #             nomera = worksheet[0].col_values(1)
+        #             if str(ob_text) in nomera:
+        #                 dei_json.json_to_clientc(user_id, ob_text)
+        #                 await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
+        #             else:
+        #                 await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+        #         else:
+        #             await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
+        #     else:
+        #         await bot.send_message(user_id=user_id, text='Здраствуйте админ')
     except Exception as e:
         logging.error(f"Ошибка в обработчике: {e}", exc_info=True)
         try:
@@ -361,6 +447,15 @@ async def on_callback(cb):
 
         await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
         # await bot.send_message(user_id=cb.user.id, text="Функция заблокирована!")
+    elif cb.payload == "parol": #смена пароля
+        dei_json.new_parol_yes(cb.user.id)
+        await bot.send_message(user_id=cb.user.id, text="Напишите новый пароль цифрами(минимум 2)")
+    elif cb.payload == "ne_tot": #смена пароля
+        dei_json.sostoinie_parol_no(cb.user.id)
+        await bot.send_message(user_id=cb.user.id, text='Напишите номер участка цифрами.')
+    elif cb.payload == "star":  # смена пароля
+        dei_json.new_parol_no(cb.user.id)
+        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
 
 
 
