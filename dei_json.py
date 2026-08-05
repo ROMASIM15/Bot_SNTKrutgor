@@ -46,6 +46,7 @@ def json_to_col_vo(idt):       #записываем первый ли раз н
             data = json.load(f)
     else:
         data = os.getenv('clients')
+    print data
     # print(data["col_vo"])
     # print(idt)
     value = data["col_vo"].get(str(idt))
