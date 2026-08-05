@@ -72,6 +72,94 @@ def json_to_col_vo(idt):       #записываем первый ли раз н
         json.dump(data, f, ensure_ascii=False, indent=4)
     return data["col_vo"][idt]
 
+def sostoinie_parol_yes(id, ych):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    data["sostoinie_paroli"][id] = ych
+
+
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    # return data["col_vo"][id]
+def sostoinie_parol_no(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    del data["sostoinie_paroli"][str(id)]
+
+
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def sostoinie_parol(idh):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+    value = data['sostoinie_paroli'].get(str(idh))
+    # print(value)
+    # if value:
+    #     ret = data["sostoinie_paroli"].get(str(idh))
+    # else:
+    #     ret = None
+        # # # star = data["col_vo"][id]
+        #
+        # del data["col_vo"][str(id)]
+        # data["col_vo"][id] = 2
+
+    # del data["sostoinie_paroli"][str(id)]
+    return value
+
+def new_parol_yes(id):
+        file_path = "clients.json"
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = {}
+
+        data["new_parol"][id] = 1
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+
+def new_parol_no(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    del data["new_parol"][str(id)]
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def new_parol(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+             data = json.load(f)
+
+
+    paril = data["new_parol"].get(str(id))
+    return paril
+
 # i=input("ID ")
 # nomer=input("номер ")
 # json_to_col_vo(i)
