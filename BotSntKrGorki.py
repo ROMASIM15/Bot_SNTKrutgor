@@ -60,17 +60,34 @@ sh = gc.open_by_key(os.getenv('key'))
 # #     gc = gspread.authorize(creds)
 # sh = gc.open_by_key(key=os.getenv('key'))
 
-worksheet = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
-worksheet2 = sh.get_worksheet(5)
+worksheetneed = [ sh.get_worksheet(4), sh.get_worksheet(3), sh.get_worksheet(2), sh.get_worksheet(1)]
+worksheet = [ worksheetneed[0].get_all_values(), worksheetneed[1].get_all_values(), worksheetneed[2].get_all_values(), worksheetneed[3].get_all_values()]
+worksheet2need = sh.get_worksheet(5)
+worksheet2 = worksheet2need.get_all_values()
+# image_path = "qiar.png"
+# photo = InputMedia(image_path)
+# metadata = sh.fetch_sheet_metadata()
+# print(metadata)
+# if 'modifiedTime' in metadata:
 
-if sh.lastUpdateTime:
-    time_table=str(sh.lastUpdateTime)
-    # print(time_table)
-    clean = time_table.replace("T", " ").replace("Z", "")
-    # time_table
-else:
-    time_table="не удалось загрузить дату обновления"
+
+# if sh.lastUpdateTime: автоматическое опраделение даты обновления таблимцы
+#     time_table=str(sh.lastUpdateTime)
+#     # print(time_table)
+#     clean = time_table.replace("T", " ").replace("Z", "")
+#     # time_table
+# else:
+#     time_table="не удалось загрузить дату обновления"
+need = sh.get_worksheet(6)
+# print(need.row_values(2))
+clean = need.cell(2,5).value
+
 #------------------------------функции -----------------------------------------------------------
+def spisok_in_spisok(spisok,nomer):
+    ret=[]
+    for i in spisok:
+        ret.append(i[nomer-1])
+    return ret
 
 def is_valid_digit_string(s: str) -> bool:
     return s.isdigit() and len(s) >= 2
@@ -85,9 +102,9 @@ def floatNew(stroka):
         return float(str(stroka).replace(',','.'))
 
 def dolg (table, god: int, number: float): # возвращает общий долг за данный год
-    data = table.col_values(1) # берём первый столбец в этом году(riw)
-    r = data.index(number) + 1 # узнаем какой по счету в столбце участок
-    rows = table.row_values(r) # берём строку с этим участком в этом году
+    data = spisok_in_spisok(table,1) # берём первый столбец в этом году(riw)
+    r = data.index(number) # узнаем какой по счету в столбце участок
+    rows = table[r] # берём строку с этим участком в этом году
     if god <2 or god==4: # c 2024 по 2026 годы
         return int(rows[19])
     elif god == 2: # 2023 год
@@ -95,9 +112,9 @@ def dolg (table, god: int, number: float): # возвращает общий д�
     else: return int(rows[15])
 
 def info_dolg (table, god: int, number: float): #вывод подробной информации о долге на конкретный год
-    data = table.col_values(1)  # берём первый столбец в этом году(riw)
-    r = data.index(number) + 1  # узнаем какой по счету в столбце участок
-    rows = table.row_values(r)  # берём строку с этим участком в этом году
+    data = spisok_in_spisok(table, 1) # берём первый столбец в этом году(riw)
+    r = data.index(number)  # узнаем какой по счету в столбце участок
+    rows = table[r]  # берём строку с этим участком в этом году
 
     if god == 0: #определяем год и тарифы
         res_god="2025 год:\n"
@@ -188,46 +205,48 @@ dobv_parol = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура о
     ])
 
 keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатура админа
-        [InlineKeyboardButton(text="Информация об участке", callback_data="inf_ych")],
-        [InlineKeyboardButton(text="Передать показания", callback_data="peredati_pocaz")],
-        [InlineKeyboardButton(text="Реквизиты для оплаты", callback_data="recvisit")]
+        [InlineKeyboardButton(text="Посмотреть данные участка", callback_data="dan_ych")],
+        [InlineKeyboardButton(text="Сколько внесено денег", callback_data="vnes")],
+        [InlineKeyboardButton(text="Список должников", callback_data="dolchi")]
     ])
-
-
 
 
 
 
 @dp.message()           #обработчик сообщений
 async def handle_messages(message: Message):
-    try:
-        user_id = message.user_id()  # правильный ID отправителя
+    global nachaloi
+    user_id = message.user_id()  # правильный ID отправителя
 
     # Увеличиваем счётчик для этого пользователя
 
-        count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
-    
-        if count == 1:
-            await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
-            await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
-    
-        else:
-            text = message.text
-            if text != "админ":
+    count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
+
+    if count == 1:
+        await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
+        await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
+
+    else:
+        text = message.text
+        if text != "админ":
+            dana_ych = dei_json.admin_smotr(user_id)
+            if dana_ych == None:
+
                 new = dei_json.new_parol(user_id)
                 # print(new)
                 if new == None:
-    
+
                     ob_text = extract_digits(text)
                     parol = dei_json.sostoinie_parol(user_id)
                     need = sh.get_worksheet(6)
                     need2 = need.col_values(1)
-    
-    
+
+
                     if parol == None:
-    
+
                         if ob_text != "":
-                            nomera = worksheet[0].col_values(1)
+                            nomera = spisok_in_spisok(worksheet[0],1)
+                            # print(nomera)
                             if str(ob_text) in nomera:
                                 await bot.send_message(user_id=user_id, text='Напишите пароль.')
                                 dei_json.sostoinie_parol_yes(user_id, ob_text)
@@ -243,13 +262,9 @@ async def handle_messages(message: Message):
                             dei_json.json_to_clientc(user_id, parol)
                             dei_json.sostoinie_parol_no(user_id)
                             await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
-    
+
                         else:
                             await bot.send_message(user_id=user_id, text='Пароль не верный, повторите попытку.', reply_markup=vbod_parol)
-    
-    
-    
-    
                 else:
                     if is_valid_digit_string(text)==True:
                         dei_json.new_parol_no(user_id)
@@ -262,80 +277,64 @@ async def handle_messages(message: Message):
                         await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
                     else:
                         await bot.send_message(user_id=user_id, text='Пароль не подходит, он должен состоять только из цифр минимум из двух, повторите попытку.',reply_markup=dobv_parol)
-    
-    
             else:
-                await bot.send_message(user_id=user_id, text='Здраствуйте админ')
+                nomer = extract_digits(text)
+                dei_json.admin_smotr_no(user_id)
+                # nomer = dei_json.json_in_client(user_id)  # берем привязаный участок к айди
 
+                await bot.send_message(user_id=user_id, text=f'номер участка: {nomer}')
 
+                # ------------------------вывод отсутствия долгов-------------------------------------
+                data = spisok_in_spisok(worksheet2,1) # берём первый столбец в 2026г
+                if nomer in data:  # проверяем есть такой участок
+                    r = data.index(nomer)  # узнаем какой по счету в столбце участок
+                    rows = worksheet2[r]  # берём строку с этим участком в 2026
 
+                    await bot.send_message(user_id=user_id, text=rows[4])  # отправляем ФИО
 
+                    if int(rows[19]) < 0 or int(rows[19]) > 0:  # не равна ли общая задолженнось 2026г нулю
+                        for riw in worksheet:  # перебираем страницы с 2025 по 2022гг
+                            if dolg(riw, worksheet.index(riw),
+                                    nomer) > 0:  # если долг в таблице номер worksheet.index(riw) есть
+                                if worksheet.index(riw) == 3:
+                                    nachaloi = 3
+                            else:
+                                if worksheet.index(riw) < 3:  # если нет долга в годах от 2023 до 2025
+                                    await bot.send_message(user_id=user_id,
+                                                           text=f"в2022-{2021 + (4 - worksheet.index(riw))}гг у вас нет долга")
+                                    nachaloi = worksheet.index(
+                                        riw) - 1  # следующий год, с которого начинаем выводить долги
+                                    break
+                                elif worksheet.index(riw) == 3:  # если нет долга в 2022 году
+                                    await bot.send_message(user_id=user_id, text="в 2022г у вас нет долга")
+                                    nachaloi = worksheet.index(riw) - 1
+                                    break
 
-        
-        # user_id = message.user_id()
-        # print(f"Получено сообщение от {user_id}: {message.text}")
+                        # --------------------------вывод старых долгов --------------------------------------------------------
+                        for i in range(nachaloi, -1, -1):
+                            riw = worksheet[i]
+                            await bot.send_message(user_id=user_id, text=info_dolg(riw, worksheet.index(riw), nomer))
 
-        # # Временно закомментируйте проблемную строку и поставьте фиктивное значение для проверки
-        # count = dei_json.json_to_col_vo(user_id)
-        # # count = 1  # для теста
+                        # -------------------------вывод 2026 года -------------------------------------------------------------
+                        await bot.send_message(user_id=user_id, text=info_dolg(worksheet2, 4, nomer))
+                        r = data.index(nomer)
+                        rows = worksheet2[r]
 
-        # if count == 1:
-        #     await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
-        #     await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
-        # else:
-        #     text = message.text
-        #     if text != "админ":
-        #         ob_text = extract_digits(text)
-        #         if ob_text != "":
-        #             nomera = worksheet[0].col_values(1)
-        #             if str(ob_text) in nomera:
-        #                 dei_json.json_to_clientc(user_id, ob_text)
-        #                 await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
-        #             else:
-        #                 await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
-        #         else:
-        #             await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
-        #     else:
-        #         await bot.send_message(user_id=user_id, text='Здраствуйте админ')
-    except Exception as e:
-        logging.error(f"Ошибка в обработчике: {e}", exc_info=True)
-        try:
-            await bot.send_message(user_id=user_id, text="Произошла ошибка, попробуйте позже.")
-        except:
-            pass
+                        if int(rows[19]) > 0:
+                            await bot.send_message(user_id=user_id, text=f'Ваш общий долг равен {rows[19]}')
+                        else:
+                            await bot.send_message(user_id=user_id,
+                                                   text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
+                    else:
+                        await bot.send_message(user_id=user_id, text="У вас нет долгов")
+                else:
+                    await bot.send_message(user_id=user_id, text=f'участок {nomer} в 2026году не найден')
+                # await bot.send_message(user_id=user_id, text=f'данная информация обновлена:\n {clean}')
 
+                await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboardadm)
 
-
-
-    
-    # logging.info(f"Получено сообщение от {message.user_id()}: {message.text}") 
-
-    
-    # user_id = message.user_id()  # правильный ID отправителя
-
-    # # Увеличиваем счётчик для этого пользователя
-
-    # count = dei_json.json_to_col_vo(user_id)         #обращаюсь к програрамме dei_json
-
-    # if count == 1:
-    #     await bot.send_message(user_id=user_id, text='Здравствуйте я бот СНТ"крутые горки"')
-    #     await bot.send_message(user_id=user_id, text='Напишите пожалуйста номер участка (цифрами).')
-
-    # else:
-    #     text = message.text
-    #     if text != "админ":
-    #         ob_text = extract_digits(text)
-    #         if ob_text != "":
-    #             nomera = worksheet[0].col_values(1)
-    #             if str(ob_text) in nomera:
-    #                 dei_json.json_to_clientc(user_id, ob_text)
-    #                 await bot.send_message(user_id=user_id, text='Что вас интересует?', reply_markup=keyboard)
-    #             else:
-    #                 await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
-    #         else:
-    #             await bot.send_message(user_id=user_id, text='Напишите номер участка цифрами.')
-    #     else:
-    #         await bot.send_message(user_id=user_id, text='Здраствуйте админ')
+        else:
+            await bot.send_message(user_id=user_id, text='Здраствуйте админ', reply_markup=keyboardadm)
 
 @dp.callback()
 async def on_callback(cb):
@@ -354,10 +353,10 @@ async def on_callback(cb):
         await bot.send_message(user_id=cb.user.id, text=f'номер участка: {nomer}')
 
 #------------------------вывод отсутствия долгов-------------------------------------
-        data = worksheet2.col_values(1) # берём первый столбец в 2026г
+        data = spisok_in_spisok(worksheet2,1) # берём первый столбец в 2026г
         if nomer in data: # проверяем есть такой участок
-            r = data.index(nomer) + 1 # узнаем какой по счету в столбце участок
-            rows = worksheet2.row_values(r) # берём строку с этим участком в 2026
+            r = data.index(nomer) # узнаем какой по счету в столбце участок
+            rows = worksheet2[r] # берём строку с этим участком в 2026
 
             await bot.send_message(user_id=cb.user.id, text=rows[4]) # отправляем ФИО
 
@@ -401,22 +400,22 @@ async def on_callback(cb):
 
 #-------------------------вывод 2026 года -------------------------------------------------------------
                 await bot.send_message(user_id=cb.user.id, text=info_dolg(worksheet2, 4, nomer))
-                r = data.index(nomer) + 1
-                rows = worksheet2.row_values(r)
+                r = data.index(nomer)
+                rows = worksheet2[r]
 
                 if int(rows[19]) > 0:
                     await bot.send_message(user_id=cb.user.id, text=f'Ваш общий долг равен {rows[19]}')
                 else:
-                    await bot.send_message(user_id=cb.user.id, text=f'Ваша общиая переплата равна {abs(int(rows[19]))}')
+                    await bot.send_message(user_id=cb.user.id, text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
             else:
                 await bot.send_message(user_id=cb.user.id, text="У вас нет долгов")
         else:
             await bot.send_message(user_id=cb.user.id, text=f'участок {nomer} в 2026году не найден')
+
         await bot.send_message(user_id=cb.user.id, text=f'данная информация обновлена:\n {clean}')
-        
+
+
         await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
-        
-    
     elif cb.payload == "recvisit": #реквизиты для оплаты
         await bot.send_file(user_id=cb.user.id, file_path="россельхозбанк qr од.png", media_type="image", text="Оплата за землю (СБЕР БАНК):")
         await bot.send_message(user_id=cb.user.id,
@@ -446,7 +445,6 @@ async def on_callback(cb):
         await bot.send_message(user_id=cb.user.id, text=f'(Пожалуйста, не забывайте указывать фамилию, сколько соток и номер участка)')
 
         await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
-        # await bot.send_message(user_id=cb.user.id, text="Функция заблокирована!")
     elif cb.payload == "parol": #смена пароля
         dei_json.new_parol_yes(cb.user.id)
         await bot.send_message(user_id=cb.user.id, text="Напишите новый пароль цифрами(минимум 2)")
@@ -456,8 +454,36 @@ async def on_callback(cb):
     elif cb.payload == "star":  # смена пароля
         dei_json.new_parol_no(cb.user.id)
         await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboard)
+    elif cb.payload == "dan_ych":  # смена пароля
+        dei_json.admin_smotr_yes(cb.user.id)
+        await bot.send_message(user_id=cb.user.id, text="Напишите участок по которому вы хотите посмотреть информацию.")
+    elif cb.payload == "vnes":  # смена пароля
+        zem_nal = worksheet2[112][9]
+        zem_bez = worksheet2[112][10]
+        svet_nal = worksheet2[112][12]
+        svet_bez = worksheet2[112][13]
+        # print(worksheet2[113])
+        await bot.send_message(user_id=cb.user.id, text=f"За землю наличными:\n{zem_nal}")
+        await bot.send_message(user_id=cb.user.id, text=f"За землю безналичными:\n{zem_bez}")
+        await bot.send_message(user_id=cb.user.id, text=f"За свет наличными:\n{svet_nal}")
+        await bot.send_message(user_id=cb.user.id, text=f"За свет безналичными:\n{svet_bez}")
+        await bot.send_message(user_id=cb.user.id, text=f"В сумме:\n{int(svet_bez) + int(zem_nal) + int(zem_bez) + int(svet_nal)}")
+        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboardadm)
+    elif cb.payload == "dolchi":  # смена пароля
+        spravka = "Должники\n участок ФИО Долг\n"
+        iting = 0
+        for i in range(112):
+            itn = worksheet2[iting][19]
+            iting += 1
+            if str(itn) != "Осталось заплатить ВСЕГО":
+                itn_clean = itn.replace(',', '.')
+                if float(itn_clean) > 0:
+                    kit = worksheet2[int(iting-1)]
 
+                    spravka+=f"{kit[0]}  {kit[4]} {itn_clean}\n"
 
+        await bot.send_message(user_id=cb.user.id, text=spravka)
+        await bot.send_message(user_id=cb.user.id, text='Что вас интересует?', reply_markup=keyboardadm)
 
 
 
