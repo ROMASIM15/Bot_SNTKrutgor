@@ -163,3 +163,38 @@ def new_parol(id):
 # i=input("ID ")
 # nomer=input("номер ")
 # json_to_col_vo(i)
+def admin_smotr_yes(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    data["smotr_admin"][id] = 1
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+def admin_smotr_no(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    del data["smotr_admin"][str(id)]
+
+
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def admin_smotr(id):
+        file_path = "clients.json"
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+        paril = data["smotr_admin"].get(str(id))
+        return paril
