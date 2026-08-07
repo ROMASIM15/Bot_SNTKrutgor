@@ -112,9 +112,13 @@ def dolg (table, god: int, number: float): # возвращает общий д�
     else: return int(rows[15])
 
 def info_dolg (table, god: int, number: float): #вывод подробной информации о долге на конкретный год
+
     data = spisok_in_spisok(table, 1) # берём первый столбец в этом году(riw)
+
     r = data.index(number)  # узнаем какой по счету в столбце участок
+
     rows = table[r]  # берём строку с этим участком в этом году
+
 
     if god == 0: #определяем год и тарифы
         res_god="2025 год:\n"
@@ -150,9 +154,10 @@ def info_dolg (table, god: int, number: float): #вывод подробной �
         else: res_god +=f"долга нет"
         return res_god
     elif god == 2: # 2023 год
+
         res_god += f"За землю - {floatNew(rows[2])} соток * {floatNew(info['сотка'])}руб.={floatNew(rows[2]) * floatNew(info['сотка'])}\n"  # земля
         if (floatNew(rows[9])) > 0:
-            res_god += f"Внесено: {floatNew(rows[9])}руб.\n {floatNew(rows[10])}\n"
+            res_god += f"Внесено: {floatNew(rows[9])}руб.\n {rows[10]}\n"
         else:
             res_god += "оплаты не было \n"
 
@@ -178,8 +183,8 @@ def info_dolg (table, god: int, number: float): #вывод подробной �
         return res_god
     else: #2022 год
         res_god += f"С учетом прошлых лет: "
-        if floatNew(rows[15])<0: res_god +=f"переплата {abs(floatNew(rows[19]))}руб."
-        elif floatNew(rows[15])>0: res_god +=f"долг {floatNew(rows[19])}руб."
+        if floatNew(rows[15])<0: res_god +=f"переплата {abs(floatNew(rows[15]))}руб."
+        elif floatNew(rows[15])>0: res_god +=f"долг {floatNew(rows[15])}руб."
         else: res_god +=f"долга нет"
         return res_god
 
@@ -292,41 +297,38 @@ async def handle_messages(message: Message):
 
                     await bot.send_message(user_id=user_id, text=rows[4])  # отправляем ФИО
 
-                    if int(rows[19]) < 0 or int(rows[19]) > 0:  # не равна ли общая задолженнось 2026г нулю
-                        for riw in worksheet:  # перебираем страницы с 2025 по 2022гг
-                            if dolg(riw, worksheet.index(riw),
-                                    nomer) > 0:  # если долг в таблице номер worksheet.index(riw) есть
-                                if worksheet.index(riw) == 3:
-                                    nachaloi = 3
-                            else:
-                                if worksheet.index(riw) < 3:  # если нет долга в годах от 2023 до 2025
-                                    await bot.send_message(user_id=user_id,
-                                                           text=f"в2022-{2021 + (4 - worksheet.index(riw))}гг у вас нет долга")
-                                    nachaloi = worksheet.index(
-                                        riw) - 1  # следующий год, с которого начинаем выводить долги
-                                    break
-                                elif worksheet.index(riw) == 3:  # если нет долга в 2022 году
-                                    await bot.send_message(user_id=user_id, text="в 2022г у вас нет долга")
-                                    nachaloi = worksheet.index(riw) - 1
-                                    break
-
-                        # --------------------------вывод старых долгов --------------------------------------------------------
-                        for i in range(nachaloi, -1, -1):
-                            riw = worksheet[i]
-                            await bot.send_message(user_id=user_id, text=info_dolg(riw, worksheet.index(riw), nomer))
-
-                        # -------------------------вывод 2026 года -------------------------------------------------------------
-                        await bot.send_message(user_id=user_id, text=info_dolg(worksheet2, 4, nomer))
-                        r = data.index(nomer)
-                        rows = worksheet2[r]
-
-                        if int(rows[19]) > 0:
-                            await bot.send_message(user_id=user_id, text=f'Ваш общий долг равен {rows[19]}')
+                    # if int(rows[19]) < 0 or int(rows[19]) > 0:  # не равна ли общая задолженнось 2026г нулю
+                    for riw in worksheet:  # перебираем страницы с 2025 по 2022гг
+                        if dolg(riw, worksheet.index(riw),nomer) > 0:  # если долг в таблице номер worksheet.index(riw) есть
+                            if worksheet.index(riw) == 3:
+                                nachaloi = 3
                         else:
-                            await bot.send_message(user_id=user_id,
-                                                   text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
+                            if worksheet.index(riw) < 3:  # если нет долга в годах от 2023 до 2025
+                                await bot.send_message(user_id=user_id,
+                                                       text=f"в 2022-{2021 + (4 - worksheet.index(riw))}гг у вас нет долга")
+                                nachaloi = worksheet.index(riw) - 1  # следующий год, с которого начинаем выводить долги
+                                break
+                            elif worksheet.index(riw) == 3:  # если нет долга в 2022 году
+                                await bot.send_message(user_id=user_id, text="в 2022г у вас нет долга")
+                                nachaloi = worksheet.index(riw) - 1
+                                break
+                        # --------------------------вывод старых долгов --------------------------------------------------------
+                    for i in range(nachaloi, -1, -1):
+                        riw = worksheet[i]
+                        await bot.send_message(user_id=user_id, text=info_dolg(riw, worksheet.index(riw), nomer))
+                        # -------------------------вывод 2026 года -------------------------------------------------------------
+                    await bot.send_message(user_id=user_id, text=info_dolg(worksheet2, 4, nomer))
+                    r = data.index(nomer)
+                    rows = worksheet2[r]
+                    if int(rows[19]) > 0:
+                        await bot.send_message(user_id=user_id, text=f'Ваш общий долг равен {rows[19]}')
+                    elif int(rows[19]) == 0:
+                        await bot.send_message(user_id=user_id, text=f'У вас нет долга')
                     else:
-                        await bot.send_message(user_id=user_id, text="У вас нет долгов")
+                        await bot.send_message(user_id=user_id,
+                                               text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
+                    # else:
+                    #     await bot.send_message(user_id=user_id, text="У вас нет долгов")
                 else:
                     await bot.send_message(user_id=user_id, text=f'участок {nomer} в 2026году не найден')
                 # await bot.send_message(user_id=user_id, text=f'данная информация обновлена:\n {clean}')
@@ -360,55 +362,58 @@ async def on_callback(cb):
 
             await bot.send_message(user_id=cb.user.id, text=rows[4]) # отправляем ФИО
 
-            if int(rows[19]) < 0 or int(rows[19]) > 0:  # не равна ли общая задолженнось 2026г нулю
-                for riw in worksheet: # перебираем страницы с 2025 по 2022гг
-                    if dolg(riw,worksheet.index(riw),nomer) > 0: # если долг в таблице номер worksheet.index(riw) есть
-                        if  worksheet.index(riw) == 3:
-                            nachalo = 3
-                    else:
-                        if worksheet.index(riw) < 3:# если нет долга в годах от 2023 до 2025
-                            await bot.send_message(user_id=cb.user.id, text=f"в2022-{2021 + (4 - worksheet.index(riw))}гг у вас нет долга")
-                            nachalo = worksheet.index(riw)-1 # следующий год, с которого начинаем выводить долги
-                            break
-                        elif worksheet.index(riw) == 3:# если нет долга в 2022 году
-                            await bot.send_message(user_id=cb.user.id, text="в 2022г у вас нет долга")
-                            nachalo = worksheet.index(riw)-1
-                            break
+            # if int(rows[19]) < 0 or int(rows[19]) > 0:  # не равна ли общая задолженнось 2026г нулю
+            for riw in worksheet: # перебираем страницы с 2025 по 2022гг
+                if dolg(riw,worksheet.index(riw),nomer) > 0: # если долг в таблице номер worksheet.index(riw) есть
+                    if  worksheet.index(riw) == 3:
+                        nachalo = 3
+                else:
+                    if worksheet.index(riw) < 3:# если нет долга в годах от 2023 до 2025
+                        await bot.send_message(user_id=cb.user.id, text=f"в 2022-{2021 + (4 - worksheet.index(riw))}гг у вас нет долга")
+                        nachalo = worksheet.index(riw)-1 # следующий год, с которого начинаем выводить долги
+                        break
+                    elif worksheet.index(riw) == 3:# если нет долга в 2022 году
+                        await bot.send_message(user_id=cb.user.id, text="в 2022г у вас нет долга")
+                        nachalo = worksheet.index(riw)-1
+                        break
 
 #--------------------------вывод старых долгов --------------------------------------------------------
-                for i in range(nachalo, -1, -1):
-                    riw = worksheet[i]
-                    # data = riw.col_values(1)
-                    # r = data.index(nomer) + 1
-                    # rows = riw.row_values(r)
-                    await bot.send_message(user_id=cb.user.id, text=info_dolg(riw, worksheet.index(riw), nomer))
-                    # if i < 3:
-                    #     if int(rows[-2]) == 0:
-                    #         await bot.send_message(user_id=cb.user.id, text=f'долга за {2021 + (4 - i)} нет')
-                    #     elif int(rows[-2]) < 0:
-                    #         await bot.send_message(user_id=cb.user.id, text=f'переплата за {2021 + (4 - i)}: {abs(int(rows[-2]))}')
-                    #     else:
-                    #         await bot.send_message(user_id=cb.user.id, text=f'долг за {2021 + (4 - i)}: {int(rows[-2])}')
-                    # else:
-                    #     if int(rows[-1]) == 0:
-                    #         await bot.send_message(user_id=cb.user.id, text=f'долга за {2021 + (4 - i)} нет')
-                    #     elif int(rows[-1]) < 0:
-                    #
-                    #         await bot.send_message(user_id=cb.user.id, text=f'переплата за {2021 + (4 - i)}: {abs(int(rows[-1]))}')
-                    #     else:
-                    #         await bot.send_message(user_id=cb.user.id, text=f'долг за {2021 + (4 - i)}: {int(rows[-1])}')
+            for i in range(nachalo, -1, -1):
+                riw = worksheet[i]
+                # data = riw.col_values(1)
+                # r = data.index(nomer) + 1
+                # rows = riw.row_values(r)
+                # print(worksheet.index(riw))
+                await bot.send_message(user_id=cb.user.id, text=info_dolg(riw, worksheet.index(riw), nomer))
+                # if i < 3:
+                #     if int(rows[-2]) == 0:
+                #         await bot.send_message(user_id=cb.user.id, text=f'долга за {2021 + (4 - i)} нет')
+                #     elif int(rows[-2]) < 0:
+                #         await bot.send_message(user_id=cb.user.id, text=f'переплата за {2021 + (4 - i)}: {abs(int(rows[-2]))}')
+                #     else:
+                #         await bot.send_message(user_id=cb.user.id, text=f'долг за {2021 + (4 - i)}: {int(rows[-2])}')
+                # else:
+                #     if int(rows[-1]) == 0:
+                #         await bot.send_message(user_id=cb.user.id, text=f'долга за {2021 + (4 - i)} нет')
+                #     elif int(rows[-1]) < 0:
+                #
+                #         await bot.send_message(user_id=cb.user.id, text=f'переплата за {2021 + (4 - i)}: {abs(int(rows[-1]))}')
+                #     else:
+                #         await bot.send_message(user_id=cb.user.id, text=f'долг за {2021 + (4 - i)}: {int(rows[-1])}')
 
 #-------------------------вывод 2026 года -------------------------------------------------------------
-                await bot.send_message(user_id=cb.user.id, text=info_dolg(worksheet2, 4, nomer))
-                r = data.index(nomer)
-                rows = worksheet2[r]
+            await bot.send_message(user_id=cb.user.id, text=info_dolg(worksheet2, 4, nomer))
+            r = data.index(nomer)
+            rows = worksheet2[r]
 
-                if int(rows[19]) > 0:
-                    await bot.send_message(user_id=cb.user.id, text=f'Ваш общий долг равен {rows[19]}')
-                else:
-                    await bot.send_message(user_id=cb.user.id, text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
+            if int(rows[19]) > 0:
+                await bot.send_message(user_id=cb.user.id, text=f'Ваш общий долг равен {rows[19]}')
+            elif int(rows[19]) == 0:
+                await bot.send_message(user_id=cb.user.id, text=f'У вас нет долга')
             else:
-                await bot.send_message(user_id=cb.user.id, text="У вас нет долгов")
+                await bot.send_message(user_id=cb.user.id, text=f'Ваша общая переплата равна {abs(int(rows[19]))}')
+            # else:
+            #     await bot.send_message(user_id=cb.user.id, text="У вас нет долгов")
         else:
             await bot.send_message(user_id=cb.user.id, text=f'участок {nomer} в 2026году не найден')
 
