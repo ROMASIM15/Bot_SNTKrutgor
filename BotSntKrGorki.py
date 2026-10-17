@@ -65,10 +65,20 @@ worksheet = [ worksheetneed[0].get_all_values(), worksheetneed[1].get_all_values
 worksheet2need = sh.get_worksheet(5)
 worksheet2 = worksheet2need.get_all_values()
 
+isklich  = ["ж138" , "Ж138", "ж 138", "Ж 138", "154", "155", "154/155", "154 / 155", "154/ 155", "154 /155"]
+
+zabr_dolg = ["3", "13", "32", "33", "40", "123", "129", "140"]
+kolos = ["227", "235", "237", "236", "240", "238", "239"]
+sharnovka = ["135", "136", "ж138", "156"]
+konez = ["14"]
+
 iskl_need = sh.get_worksheet(7)
 iskl = iskl_need.get_all_values()
 zabr_need = sh.get_worksheet(8)
 zabr = zabr_need.get_all_values()
+
+schethic_need = sh.get_worksheet(9)
+schethic = schethic_need.get_all_values()
 
 
 
@@ -98,7 +108,25 @@ def is_valid_digit_string(s: str) -> bool:
 
 def extract_digits(text: str) -> str:
     """Возвращает строку, содержащую только цифры из исходного текста."""
-    return ''.join(ch for ch in text if ch.isdigit())
+    if(iskluch_dach(text)==0):
+        return ''.join(ch for ch in text if ch.isdigit())
+    else:
+        return iskluch_dach(text)
+
+def iskluch_dach(nomer):
+    #print(nomer)
+    r = 0
+    for i in isklich:
+        #print(i)
+        if i in str(nomer):
+            r=1
+            if i == "Ж138" or  i == "Ж 138" or  i == "ж 138" or  i == "ж138":
+                return "ж138"
+            elif i == "154" or  i == "155" or  i == "154 / 155" or i == "154/ 155" or  i == "154 /155" or i == "154/155":
+                return "154/155"
+
+    if r == 0:
+        return 0
 
 def floatNew(stroka):
     if stroka == None or stroka == "": return 0
@@ -204,7 +232,7 @@ keyboard = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура об
         [InlineKeyboardButton(text="Реквизиты для оплаты", callback_data="recvisit")],
         [InlineKeyboardButton(text="сменить пароль", callback_data="parol")]
 
-    ])
+   ])
 
 vbod_parol = InlineKeyboardMarkup(inline_keyboard=[     #клавиатура обычного пользователя
         [InlineKeyboardButton(text="Выбрать другой участок", callback_data="ne_tot")]
@@ -229,6 +257,19 @@ keyboardadm = InlineKeyboardMarkup(inline_keyboard=[        #клавиатур�
 async def handle_messages(message: Message):
     global nachaloi
     user_id = message.user_id()  # правильный ID отправителя
+
+    # bittons = [
+    #     [InlineKeyboardButton(text="Информация об участке", callback_data="inf_ych")],
+    #     [InlineKeyboardButton(text="Передать показания", callback_data="peredati_pocaz")],
+    #     [InlineKeyboardButton(text="Реквизиты для оплаты", callback_data="recvisit")],
+    #     [InlineKeyboardButton(text="сменить пароль", callback_data="parol")]
+    # ]
+    #
+    # if str(message.sender.id) == "16261973":
+    #     bittons.append(
+    #         [InlineKeyboardButton(text="передать показания", callback_data="pokas")]
+    #     )
+    # keyboard = InlineKeyboardMarkup(inline_keyboard=bittons)
 
     # Увеличиваем счётчик для этого пользователя
 
@@ -256,40 +297,83 @@ async def handle_messages(message: Message):
 
                     if parol == None:
 
-                        if ob_text != "":
-                            nomera = spisok_in_spisok(worksheet[0],1)
-                            # print(nomera)
+                        shet = dei_json.schet_vvod(user_id)
+
+                        if shet == None:
+                            if ob_text != "":
+                                nomera = spisok_in_spisok(worksheet[0],1)
+                                # print(nomera)
 
 
-                            iskluch = spisok_in_spisok(iskl, 1)
-                            if str(ob_text) in iskluch:
-                                linia_nomer = iskluch.index(str(ob_text))
-                                linia = iskl[int(linia_nomer)]
-                                await bot.send_message(user_id=user_id, text=f'Владелец участка *{linia[2]}*\n исключён из СНТ в {linia[3]}году\n'
-                                                                             f'количество соток {linia[1]}', format="markdown")
-                                await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
-                            else:
-                                zabrosh = spisok_in_spisok(zabr, 1)
-                                if str(ob_text) in zabrosh:
-                                    linia_nomer = zabrosh.index(str(ob_text))
-                                    linia = zabr[linia_nomer]
-                                    await bot.send_message(user_id=user_id,
-                                                           text='*__Участок заброшен__*', format="markdown")
-                                    await bot.send_message(user_id=user_id,
-                                                           text=f'последний собственник {linia[2]}\n'
-                                                                f'количество соток {linia[1]}\n'
-                                                                f'{linia[3]}')
-
+                                iskluch = spisok_in_spisok(iskl, 1)
+                                if str(ob_text) in iskluch:
+                                    #print(iskluch)
+                                    linia_nomer = iskluch.index(str(ob_text))
+                                    linia = iskl[int(linia_nomer)]
+                                    await bot.send_message(user_id=user_id, text=f'Владелец участка *{linia[2]}*\n исключён из СНТ в {linia[3]}году\n'
+                                                                                 f'количество соток {linia[1]}', format="markdown")
                                     await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
                                 else:
-                                    if str(ob_text) in nomera:
-                                        await bot.send_message(user_id=user_id, text='Напишите пароль.')
-                                        dei_json.sostoinie_parol_yes(user_id, ob_text)
-                                    else:
-                                        await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+                                    zabrosh = spisok_in_spisok(zabr, 1)
+                                    if str(ob_text) in zabrosh:
+                                        linia_nomer = zabrosh.index(str(ob_text))
+                                        linia = zabr[linia_nomer]
+                                        await bot.send_message(user_id=user_id,
+                                                               text='*__Участок заброшен__*', format="markdown")
+                                        await bot.send_message(user_id=user_id,
+                                                               text=f'последний собственник {linia[2]}\n'
+                                                                    f'количество соток {linia[1]}\n'
+                                                                    f'{linia[3]}')
 
+                                        await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
+                                    else:
+                                        if str(ob_text) in nomera:
+                                            if iskluch_dach(text) == 0:
+                                                await bot.send_message(user_id=user_id, text='Напишите пароль.')
+                                                dei_json.sostoinie_parol_yes(user_id, ob_text)
+                                            else:
+                                                await bot.send_message(user_id=user_id, text='Напишите пароль.')
+                                                #print("начал")
+                                                dei_json.sostoinie_parol_yes(user_id, iskluch_dach(text))
+                                        else:
+                                            if iskluch_dach(text) == 0:
+                                                await bot.send_message(user_id=user_id, text='Этого участка несуществует.')
+                                            else:
+                                                await bot.send_message(user_id=user_id, text='Напишите пароль.')
+                                                #print("начал")
+                                                dei_json.sostoinie_parol_yes(user_id, iskluch_dach(text))
+
+
+                            else:
+                                await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
                         else:
-                            await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
+                            schet_vvod_no(user_id)
+
+                            data = spisok_in_spisok(schethic, 1)  # берём первый столбец в 2026г
+                            nomer = dei_json.json_in_client(user_id)
+                            r = data.index(nomer)  # узнаем какой по счету в столбце участок
+                            rowis = schethic[r]  # берём строку с этим участком в 2026
+                            now = time.localtime()  # текущее локальное время как struct_time
+                            # print(now.tm_mon)
+                            # print(schethic[113][2], rowis[now.tm_mon], text)
+                            mous = int(now.tm_mon)
+                            # print(schethic[113][2], rowis[mous], text)
+                            #star_schet = int(rowis[mous])
+                            chet =  int(text)
+                            mnoch = int(schethic[113][2])
+
+                            await bot.send_message(user_id=user_id, text=f"**К оплате: {chet*mnoch}**", format="markdown")
+
+                            need = sh.get_worksheet(9)
+                            need2 = need.col_values(1)
+                            r = need2.index(dei_json.json_in_client(user_id)) + 1  # узнаем какой по счету в столбце участок
+                            # rows = need.row_values(r)
+                            # print(r)
+                            need.update_cell(r, mous+1, chet)
+
+                            await bot.send_message(user_id=user_id, text='**Что вас интересует?**',
+                                                   reply_markup=keyboard, format="markdown")
+
                     else:
                         r = need2.index(parol) + 1  # узнаем какой по счету в столбце участок
                         rows = need.row_values(r)
@@ -320,6 +404,7 @@ async def handle_messages(message: Message):
                 if str(ob_text) in iskluch:
                     linia_nomer = iskluch.index(str(ob_text))
                     linia = iskl[int(linia_nomer)]
+                    print(linia_nomer, ob_text)
                     await bot.send_message(user_id=user_id,
                                            text=f'Владелец участка *{linia[2]}*\n исключён из СНТ в {linia[3]}году\n'
                                                 f'количество соток {linia[1]}', format="markdown")
@@ -338,7 +423,11 @@ async def handle_messages(message: Message):
 
                         # await bot.send_message(user_id=user_id, text='**Напишите номер участка цифрами.**', format="markdown")
                     else:
-                        nomer = extract_digits(text)
+                        if iskluch_dach(text) == 0:
+                            nomer = extract_digits(text)
+                        else:
+                            nomer = iskluch_dach(text)
+
 
                         # nomer = dei_json.json_in_client(user_id)  # берем привязаный участок к айди
 
@@ -399,9 +488,32 @@ async def on_callback(cb):
     global worksheet2
     global nachalo
 
+
+
     # проверяем какая кнопка нажалась
     if cb.payload == "peredati_pocaz":#передать показания
-        await bot.send_message(user_id=cb.user.id, text="Функция заблокирована!")
+        await bot.send_file(user_id=cb.user.id, file_path="qr_sbor.jpg", media_type="image",
+                            text="""Номер счёта: 40703810908890000002
+Валюта: RUR
+Название: САДОВОДЧЕСКОЕ НЕКОММЕРЧЕСКОЕ ТОВАРИЩЕСТВО "КРУТЫЕ ГОРКИ"
+ИНН: 2424003947
+КПП: 242401001
+Банк: АО "АЛЬФА-БАНК"
+БИК: 044525593
+Кор. счёт: 30101810200000000593
+Адрес получателя: улица Шевченко, д. Д. 50, кв./оф. КВ. 52, Красноярский край, р-н ГОРОД КРАСНОЯРСК, г. Красноярск
+
+Сформировано с помощью мобильного банка Альфа-Бизнес Мобайл""")
+        nomer = dei_json.json_in_client(cb.user.id)
+        data = spisok_in_spisok(worksheet2, 1)  # берём первый столбец в 2026г
+        r = data.index(nomer)  # узнаем какой по счету в столбце участок
+        rows = worksheet2[r]  # берём строку с этим участком в 2026
+        await bot.send_message(user_id=cb.user.id, text=f"вы накопили {rows[22]} из 15000 рублей")
+
+        if str(cb.user.id) == "16261973":
+            await bot.send_message(user_id=cb.user.id, text="Напишите показания")
+            dei_json.schet_vvod_yes(cb.user.id)
+
     elif cb.payload == "inf_ych":#информация об участке
 
 
@@ -483,7 +595,7 @@ async def on_callback(cb):
 
         await bot.send_message(user_id=cb.user.id, text='**Что вас интересует?**', reply_markup=keyboard, format="markdown")
     elif cb.payload == "recvisit": #реквизиты для оплаты
-        await bot.send_file(user_id=cb.user.id, file_path="россельхозбанк qr од.png", media_type="image", text="Оплата за землю (СБЕР БАНК):")
+        await bot.send_file(user_id=cb.user.id, file_path="qr_sberbank.jpg", media_type="image", text="Оплата за землю (СБЕР БАНК):")
         await bot.send_message(user_id=cb.user.id,
                                text='''
         Наименование: СНТ "КРУТЫЕ ГОРКИ"
@@ -528,15 +640,25 @@ async def on_callback(cb):
         zem_bez = worksheet2[112][10]
         svet_nal = worksheet2[112][12]
         svet_bez = worksheet2[112][13]
+        itog = worksheet2[112][17]
         # print(worksheet2[113])
         await bot.send_message(user_id=cb.user.id, text=f"За землю наличными:\n{zem_nal}")
         await bot.send_message(user_id=cb.user.id, text=f"За землю безналичными:\n{zem_bez}")
         await bot.send_message(user_id=cb.user.id, text=f"За свет наличными:\n{svet_nal}")
         await bot.send_message(user_id=cb.user.id, text=f"За свет безналичными:\n{svet_bez}")
-        await bot.send_message(user_id=cb.user.id, text=f"В сумме:\n{int(svet_bez) + int(zem_nal) + int(zem_bez) + int(svet_nal)}")
+        await bot.send_message(user_id=cb.user.id, text=f"В сумме:\n{itog}")
         await bot.send_message(user_id=cb.user.id, text='**Что вас интересует?**', reply_markup=keyboardadm, format="markdown")
     elif cb.payload == "dolchi":  # смена пароля
-        spravka = "Должники\n участок ФИО Долг\n"
+        spravka= "**Должники**\n\n\n"
+        zb_dl = "\n\n\n**Заброшены**\n\n"
+        sh_dl = "\n\n\n**Жарновка**\n\n"
+        kl_dl = "\n\n\n**Колос**\n\n"
+
+        itog_sprav = 0
+        itog_zb = 0
+        itog_sh = 0
+        itog_kl = 0
+
         iting = 0
         for i in range(112):
             itn = worksheet2[iting][19]
@@ -544,13 +666,42 @@ async def on_callback(cb):
             if str(itn) != "Осталось заплатить ВСЕГО":
                 itn_clean = itn.replace(',', '.')
                 if float(itn_clean) > 0:
-                    kit = worksheet2[int(iting-1)]
+                    kit = worksheet2[int(iting - 1)]
 
-                    spravka+=f"{kit[0]}  {kit[4]} {itn_clean}\n"
+                    if kit[0] not in zabr_dolg and kit[0] not in kolos and kit[0] not in sharnovka and kit[0] not in konez:
+                        spravka+=f"{kit[0]}  {kit[4]} {itn_clean}\n"
+                        itog_sprav += float(itn_clean)
+                    elif kit[0] in zabr_dolg and kit[0] not in konez:
+                        zb_dl += f"{kit[0]}  {kit[4]} {itn_clean}\n"
+                        itog_zb += float(itn_clean)
+                    elif kit[0] in kolos and kit[0] not in zabr_dolg and kit[0] not in konez:
+                        kl_dl += f"{kit[0]}  {kit[4]} {itn_clean}\n"
+                        itog_kl += float(itn_clean)
+                    elif kit[0] in sharnovka and kit[0] not in zabr_dolg and kit[0] not in konez:
+                        sh_dl += f"{kit[0]}  {kit[4]} {itn_clean}\n"
+                        itog_sh += float(itn_clean)
 
-        await bot.send_message(user_id=cb.user.id, text=spravka)
+
+        spravka += "\n **Итого:** "
+        spravka += str(itog_sprav)
+
+        spravka += sh_dl
+        spravka += "\n **Итого:** "
+        spravka += str(itog_sh)
+
+        spravka += kl_dl
+        spravka += "\n **Итого:** "
+        spravka += str(itog_kl)
+
+        spravka += zb_dl
+        spravka += "\n **Итого:** "
+        spravka += str(itog_zb)
+
+        spravka += "\n\n\n **Итого общий долг:** "
+        spravka += str(itog_sprav+itog_sh+itog_kl+itog_zb)
+
+        await bot.send_message(user_id=cb.user.id, text=spravka, format="markdown")
         await bot.send_message(user_id=cb.user.id, text='**Что вас интересует?**', reply_markup=keyboardadm, format="markdown")
-
 
 
 
