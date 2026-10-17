@@ -198,3 +198,39 @@ def admin_smotr(id):
 
         paril = data["smotr_admin"].get(str(id))
         return paril
+
+def schet_vvod_yes(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    data["schet"][id] = 1
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def schet_vvod_no(id):
+        file_path = "clients.json"
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = {}
+
+        del data["schet"][str(id)]
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+def schet_vvod(id):
+    file_path = "clients.json"
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+             data = json.load(f)
+
+
+    paril = data["schet"].get(str(id))
+    return paril
